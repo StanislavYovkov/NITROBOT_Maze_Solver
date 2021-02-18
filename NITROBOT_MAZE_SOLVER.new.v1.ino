@@ -10,6 +10,8 @@
 
 #include <Servo.h>
 
+// PROBEN TEKST 
+
 // Тук е секцията с описание на използваните пинове:
 
 // дефинициите са изцяло с главни букви
@@ -24,8 +26,6 @@ const int RightIrAvoidancePin = A5;
 const int UltrasonicPin = 3; 
 const int RgbPin = 2;
 // и тези пинове трябва да са константи - не се променят
-// int servoPin = 13;
-// int ledPin = 33;
 const int ServoPin = 13;
 const int LedPin = 33;
 
