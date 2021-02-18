@@ -43,7 +43,7 @@ const float SideCorridorTreshold = MazeCorridorWidth;
 //? С теаи параметри правим нещо като ръчен PID алгоритъм за следване на централната линия спрямо измереното разстояние до страничната стена
 const float CenterLineTolerance = 1.0; // plus/minus how many cm are acceptable to consider the movement to be on the center line...
                                        // +- 1 cm from centerline is considered straight movement!!!
-const float SharpTurnTreshold = 5.0;   // TODO Да се определи спрямо размера робота и коридора !!!!!
+const float SharpTurnTreshold = 8.0;   // TODO Да се определи спрямо размера робота и коридора !!!!!
 
 //? От тук задаваме дали ще следваме дясна или лява стена за да е универсале алгоритъма
 const int WallFollowingSide = -90; //Set: -90 for right wall following or +90 for left wall following
@@ -56,7 +56,7 @@ const int FrontServoDelay = 150;
 const int SideServoDelay = 150;
 
 const int SpeedLeft = 100;
-const int SpeedRight = 100 * 1.25; // corection
+const int SpeedRight = 100 * 1.00; // corection
 
 
 // Тук започват ГЛОБАЛНИТЕ променливи, които се използват в кода:
@@ -75,6 +75,8 @@ void turnSlightRight();
 void stopMoving();
 float getDistance(int servoAngle, int delayAfterServoMovement); //read the Ultasonic Sensor pointing at the given servo angle
 float MaxDistance = 80;
+int speedLeft = SpeedLeft;
+int speedRight = SpeedRight;
 //-----------------------------------------------
 
 void setup()
@@ -90,13 +92,14 @@ void setup()
   myservo.attach(ServoPin);
   myservo.write(90); //Move the servo to center position
   moveForward();
+ //delay(10000); //test !!!!!!! Calibration
 }
 
 //---------------------------------------------------------
 
 void loop()
 {
-
+  
   float frontDistance, sideDistance;
   // states:
   int currentState; //? Правим проверките универсални - за следване на стена отдясно или отляво в зависимост от избрания WallFollowingSide - параметър по-горе.
@@ -113,13 +116,13 @@ void loop()
   frontDistance = getDistance(FrontServoAngle, FrontServoDelay);
   sideDistance = getDistance(SideServoAngle, SideServoDelay);
 
-  if (frontDistance <= FrontDistanceTreshold + 15 ) //Стената отпред е близко
+  if (frontDistance <= FrontDistanceTreshold  ) //Стената отпред е близко
   {
     if (sideDistance < SideCorridorTreshold)
     {
       // 1 Приближили сме стена отпред (<= FrontDistanceTreshold), отдясно/отляво има стена (< SideCorridorTreshold)
-      // - завой на 180 градуса
-      currentState = 1; // turn 180 degrees
+      // - завой на 90 градуса
+      currentState = 1; // turn 90 degrees
     }
     else if (sideDistance >= SideCorridorTreshold)
     {
@@ -129,7 +132,7 @@ void loop()
       currentState = 2; // turn 90 degrees
     }
   }
-  else if (frontDistance > FrontDistanceTreshold + 15 ) //Стената отпред е далече
+  else if (frontDistance > FrontDistanceTreshold  ) //Стената отпред е далече
   {
     if (sideDistance >= SideCorridorTreshold)
     {
@@ -185,7 +188,7 @@ void loop()
     case 1:
     stopMoving();
     moveBackward();
-    delay(250);
+    delay(200);
     makeSlightLeftTurn();
     delay(500);
      /* завой на 180 градуса */
@@ -197,20 +200,34 @@ void loop()
       Serial.print(2);
        stopMoving();
     moveBackward();
-    delay(250);
+    delay(200);
     turnSlightRight();
         delay(500);
       break;
     case 3:
+        stopMoving();
+    moveBackward();
+    delay(200);
+    turnSlightRight();
+        delay(500);
       /* завой на 90 градуса надясно/наляво */
       break;
     case 4:
+       speedLeft = SpeedLeft * 1.0;
+       speedRight = SpeedRight * 1.0;
+       moveForward();
       /* движение право напред */
       break;
     case 5:
       /* движение напред с остър завой наляво/надясно */
+       speedLeft = SpeedLeft * 2.0;
+       speedRight = SpeedRight * 1.0;
+       moveForward();
       break;
     case 6:
+      speedLeft = SpeedLeft *1.0;
+       speedRight = SpeedRight *2.0;
+       moveForward();
       /* движение напред с остър завой надясно/наляво */
       break;
     case 7:
@@ -269,6 +286,7 @@ void loop()
     // }
 
     // moveForward();
+   
     stopMoving();
     moveForward();
 }
@@ -276,9 +294,9 @@ void loop()
 
 void moveForward()
 {
-  analogWrite(LEFT_FOR, abs(SpeedLeft));
+  analogWrite(LEFT_FOR, abs(speedLeft));
   analogWrite(LEFT_BACK, LOW);
-  analogWrite(RIGHT_FOR, abs(SpeedRight));
+  analogWrite(RIGHT_FOR, abs(speedRight));
   analogWrite(RIGHT_BACK, LOW);
 }
 
@@ -295,9 +313,9 @@ void turnRight()
 void moveBackward()
 {
   analogWrite(LEFT_FOR, LOW);
-  analogWrite(LEFT_BACK, abs(SpeedLeft));
+  analogWrite(LEFT_BACK, abs(speedLeft));
   analogWrite(RIGHT_FOR, LOW);
-  analogWrite(RIGHT_BACK, abs(SpeedRight));
+  analogWrite(RIGHT_BACK, abs(speedRight));
 }
 
 void makeSlightLeftTurn()
