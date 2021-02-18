@@ -174,6 +174,7 @@ void loop()
 
       currentState = 8; //Close to the wall we are following - hard turn to centerline
     }
+  }
     switch (currentState)
     {
     case 1:
@@ -248,7 +249,7 @@ void loop()
     // }
 
     // moveForward();
-  }
+  
 }
 //==================================== VOID =====================================================
 
