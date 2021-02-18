@@ -30,10 +30,10 @@ const int ServoPin = 13;
 const int LedPin = 33;
 
 // Robot parameters:
-const int RobotLenght = 54; // TODO Да се сложат реалните размери на робота !!!!
-const int robotWidth = 30;  // TODO Да се сложат реалните размери на робота !!!!
+const int RobotLenght = 24; // TODO Да се сложат реалните размери на робота !!!!
+const int robotWidth = 16;  // TODO Да се сложат реалните размери на робота !!!!
 // Maze parameters:
-const int MazeCorridorWidth = RobotLenght * 1.5; // i.e. Corridor width //? ЗА СЕГА СЛАГАМЕ ШИРОЧИНАТА НА РОБОТА ДА Е 1.5 ОТ ДЪЛЖИНАТА НА РОБОТА !!!!
+const int MazeCorridorWidth = RobotLenght * 1.5; // i.e. Corridor width //? ЗА СЕГА СЛАГАМЕ ШИРОЧИНАТА НА РОБОТА ДА Е 1.5 ОТ ДЪЛЖИНАТА НА РОБОТА 36sm.!!!!
 
 // Tresholds:
 const float FrontDistanceTreshold = MazeCorridorWidth - RobotLenght;
@@ -58,6 +58,7 @@ const int SideServoDelay = 150;
 const int SpeedLeft = 100;
 const int SpeedRight = 100 * 1.25; // corection
 
+
 // Тук започват ГЛОБАЛНИТЕ променливи, които се използват в кода:
 // променливите започват с малка буква, а всяка следваща дума с главна буква
 // ....
@@ -73,7 +74,7 @@ void makeSlightLeftTurn();
 void turnSlightRight();
 void stopMoving();
 float getDistance(int servoAngle, int delayAfterServoMovement); //read the Ultasonic Sensor pointing at the given servo angle
-
+float MaxDistance = 80;
 //-----------------------------------------------
 
 void setup()
@@ -85,9 +86,10 @@ void setup()
   pinMode(RIGHT_BACK, OUTPUT);
   pinMode(UltrasonicPin, OUTPUT);
   pinMode(LedPin, OUTPUT);
-
+  Serial.begin(9600);
   myservo.attach(ServoPin);
   myservo.write(90); //Move the servo to center position
+  moveForward();
 }
 
 //---------------------------------------------------------
@@ -111,7 +113,7 @@ void loop()
   frontDistance = getDistance(FrontServoAngle, FrontServoDelay);
   sideDistance = getDistance(SideServoAngle, SideServoDelay);
 
-  if (frontDistance <= FrontDistanceTreshold) //Стената отпред е близко
+  if (frontDistance <= FrontDistanceTreshold + 15 ) //Стената отпред е близко
   {
     if (sideDistance < SideCorridorTreshold)
     {
@@ -127,7 +129,7 @@ void loop()
       currentState = 2; // turn 90 degrees
     }
   }
-  else if (frontDistance > FrontDistanceTreshold) //Стената отпред е далече
+  else if (frontDistance > FrontDistanceTreshold + 15 ) //Стената отпред е далече
   {
     if (sideDistance >= SideCorridorTreshold)
     {
@@ -174,14 +176,30 @@ void loop()
 
       currentState = 8; //Close to the wall we are following - hard turn to centerline
     }
+     if (frontDistance > MaxDistance  && sideDistance > MaxDistance){
+      currentState = 9; //FINAL
+      }
   }
     switch (currentState)
     {
     case 1:
-      /* завой на 180 градуса */
+    stopMoving();
+    moveBackward();
+    delay(250);
+    makeSlightLeftTurn();
+    delay(500);
+     /* завой на 180 градуса */
+    Serial.print(1);
+  
       break;
     case 2:
       /* завой на 90 градуса надясно/наляво */
+      Serial.print(2);
+       stopMoving();
+    moveBackward();
+    delay(250);
+    turnSlightRight();
+        delay(500);
       break;
     case 3:
       /* завой на 90 градуса надясно/наляво */
@@ -201,7 +219,9 @@ void loop()
     case 8:
       /* движение напред със завой леко надясно/наляво */
       break;
-
+    case 9:
+    stopMoving();
+    delay(20000);
     default:
       break;
     }
@@ -249,7 +269,8 @@ void loop()
     // }
 
     // moveForward();
-  
+    stopMoving();
+    moveForward();
 }
 //==================================== VOID =====================================================
 
@@ -266,8 +287,10 @@ void turnRight()
   analogWrite(LEFT_FOR, 255);
   analogWrite(LEFT_BACK, LOW);
   analogWrite(RIGHT_FOR, LOW);
-  analogWrite(RIGHT_BACK, 20);
+  analogWrite(RIGHT_BACK, 60);
 }
+
+
 
 void moveBackward()
 {
@@ -284,6 +307,9 @@ void makeSlightLeftTurn()
   analogWrite(RIGHT_FOR, 150);
   analogWrite(RIGHT_BACK, LOW);
 }
+
+
+
 
 void turnSlightRight()
 {
