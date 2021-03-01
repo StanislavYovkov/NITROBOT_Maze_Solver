@@ -77,10 +77,10 @@ void loop()
   if (frontDistance == 0)
     frontDistance = 255;
 
-  leftDistance = sonar_L.ping_cm();  //read left Ultrasonic sensor 
-  Serial.println(leftDistance);
-  if (leftDistance == 0)
-    leftDistance = 255;
+//  leftDistance = sonar_L.ping_cm();  //read left Ultrasonic sensor 
+//  Serial.println(leftDistance);
+//  if (leftDistance == 0)
+//    leftDistance = 255;
 
   if (frontDistance <= 15.0) //the front wall is neal, turn left 90 degrees
   {
